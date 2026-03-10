@@ -28,29 +28,28 @@ A web-based camera control system for managing time-lapse photography with remot
    ./setup-pi.sh
    ```
 
-   For persistent Cloudflare tunnel URL:
-   ```bash
-   CLOUDFLARE_TUNNEL_TOKEN="your-token" ./setup-pi.sh
-   ```
-
 ## Configuration
 
-### WiFi Credentials (Headless Setup)
+### WiFi & Cloudflare Configuration (Headless Setup)
 
-After flashing the SD card, you can easily change WiFi credentials without re-flashing:
+After flashing the SD card, you can easily configure WiFi and Cloudflare tunnel without re-flashing:
 
 1. **Initial Setup**: When running `setup-pi.sh`, a `wifi-config.txt` file is created on the boot partition
-2. **To Change WiFi**:
+2. **To Configure**:
    - Remove SD card from Raspberry Pi
    - Insert into your computer
    - Open the boot partition (appears as `bootfs` or `boot`)
    - Edit `wifi-config.txt`:
      ```
-     SSID=YourNewWiFiName
-     PASSWORD=YourNewPassword
+     SSID=YourWiFiName
+     PASSWORD=YourWiFiPassword
+     
+     # Cloudflare Tunnel Token
+     # Get your tunnel token from: https://one.dash.cloudflare.com/
+     CLOUDFLARE_TUNNEL_TOKEN=your-tunnel-token-here
      ```
    - Eject and insert back into Raspberry Pi
-   - The Pi will automatically connect to the new WiFi on boot
+   - The Pi will automatically connect to WiFi and configure the Cloudflare tunnel on boot
 
 The boot partition is FAT32, so it's accessible from Windows, macOS, and Linux.
 
