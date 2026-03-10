@@ -1,0 +1,17 @@
+# WiFi Configuration for PiLookie
+# Copy this file to the boot partition of your SD card as "wifi-config.txt"
+# 
+# When you need to change WiFi credentials:
+# 1. Remove SD card from Raspberry Pi
+# 2. Insert into your computer
+# 3. Open the boot partition (appears as "bootfs" or "boot")
+# 4. Edit wifi-config.txt with your credentials
+# 5. Eject SD card and insert back into Raspberry Pi
+# 6. The Pi will automatically connect to the new WiFi on next boot
+
+SSID=YourWiFiName
+PASSWORD=YourWiFiPassword
+
+# Cloudflare Tunnel Token
+# Get your tunnel token from: https://dash.cloudflare.com/
+CLOUDFLARE_TUNNEL_TOKEN=

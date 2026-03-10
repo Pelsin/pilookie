@@ -1,0 +1,6 @@
+{
+  "timelapse": {
+    "enabled": false,
+    "interval": 3
+  }
+}
