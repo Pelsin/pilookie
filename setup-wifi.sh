@@ -27,12 +27,15 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
-NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
+# Find the existing netplan config
+NETPLAN_CONFIG=$(ls /etc/netplan/*.yaml 2>/dev/null | grep -E '(90-NM|50-cloud)' | head -1)
 
-# Backup original if not already backed up
-if [ ! -f "${NETPLAN_CONFIG}.backup" ]; then
-    cp "$NETPLAN_CONFIG" "${NETPLAN_CONFIG}.backup" 2>/dev/null || true
+# If no existing config found, create a new one
+if [ -z "$NETPLAN_CONFIG" ]; then
+    NETPLAN_CONFIG="/etc/netplan/50-pilookie-wifi.yaml"
 fi
+
+echo "Using netplan config: $NETPLAN_CONFIG"
 
 # Create netplan configuration
 cat > "$NETPLAN_CONFIG" <<EOF
@@ -51,7 +54,5 @@ chmod 600 "$NETPLAN_CONFIG"
 
 # Apply netplan configuration
 netplan apply
-
-echo "WiFi configuration updated successfully"
 
 echo "WiFi configuration updated successfully"
