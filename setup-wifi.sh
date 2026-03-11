@@ -2,8 +2,6 @@
 # This script runs on boot to update WiFi credentials from a user-editable file
 # It is installed and enabled by setup-pi.sh
 
-set -x  # Enable debug logging
-
 # Try to find the boot partition
 if [ -d "/boot/firmware" ]; then
     CONFIG_FILE="/boot/firmware/wifi-config.txt"
@@ -14,18 +12,13 @@ else
     exit 1
 fi
 
-echo "Looking for config file at: $CONFIG_FILE"
-
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "No WiFi config file found at $CONFIG_FILE"
-    ls -la "$(dirname "$CONFIG_FILE")" 2>&1 || true
     exit 0
 fi
 
 SSID=$(grep "^SSID=" "$CONFIG_FILE" | cut -d= -f2 | tr -d '\r')
 PASSWORD=$(grep "^PASSWORD=" "$CONFIG_FILE" | cut -d= -f2 | tr -d '\r')
-
-echo "Read SSID: $SSID"
 
 if [ -z "$SSID" ] || [ -z "$PASSWORD" ]; then
     echo "WiFi credentials not found or incomplete"
@@ -34,48 +27,31 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
-WIFI_CONFIG="/etc/NetworkManager/system-connections/pilookie-wifi.nmconnection"
+NETPLAN_CONFIG="/etc/netplan/50-cloud-init.yaml"
 
-nmcli connection delete pilookie-wifi 2>/dev/null || true
-rm -f "$WIFI_CONFIG"
+# Backup original if not already backed up
+if [ ! -f "${NETPLAN_CONFIG}.backup" ]; then
+    cp "$NETPLAN_CONFIG" "${NETPLAN_CONFIG}.backup" 2>/dev/null || true
+fi
 
-UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "pilookie-$(date +%s)")
-
-# Generate PSK hash using wpa_passphrase
-PSK_HASH=$(wpa_passphrase "$SSID" "$PASSWORD" | grep -E '^\s*psk=' | grep -v '#psk' | cut -d= -f2)
-
-cat > "$WIFI_CONFIG" <<EOF
-[connection]
-id=pilookie-wifi
-uuid=$UUID
-type=wifi
-autoconnect=true
-autoconnect-priority=999
-permissions=
-
-[wifi]
-ssid=$SSID
-mode=infrastructure
-
-[wifi-security]
-key-mgmt=wpa-psk
-psk=$PSK_HASH
-psk-flags=0
-
-[ipv4]
-method=auto
-
-[ipv6]
-method=auto
-
-[proxy]
+# Create netplan configuration
+cat > "$NETPLAN_CONFIG" <<EOF
+network:
+  version: 2
+  wifis:
+    wlan0:
+      optional: true
+      access-points:
+        "$SSID":
+          password: "$PASSWORD"
+      dhcp4: true
 EOF
 
-chmod 600 "$WIFI_CONFIG"
-chown root:root "$WIFI_CONFIG"
+chmod 600 "$NETPLAN_CONFIG"
 
-nmcli connection reload
-sleep 1
-nmcli connection up pilookie-wifi 2>&1 || true
+# Apply netplan configuration
+netplan apply
+
+echo "WiFi configuration updated successfully"
 
 echo "WiFi configuration updated successfully"
