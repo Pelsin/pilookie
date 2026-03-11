@@ -34,46 +34,39 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
-if command -v nmcli &> /dev/null; then
-    echo "Using NetworkManager..."
-    
-    nmcli connection delete pilookie-wifi 2>/dev/null || true
-    
-    nmcli connection add \
-        type wifi \
-        con-name pilookie-wifi \
-        ifname wlan0 \
-        ssid "$SSID" \
-        wifi-sec.key-mgmt wpa-psk \
-        wifi-sec.psk "$PASSWORD" \
-        wifi-sec.psk-flags 0 \
-        connection.autoconnect yes \
-        connection.autoconnect-priority 999
-    
-    sleep 1
-    
-    nmcli connection up pilookie-wifi 2>&1 || echo "Connection will activate automatically"
-    
-elif [ -f /etc/dhcpcd.conf ]; then
-    echo "Using dhcpcd/wpa_supplicant..."
-    
-    # Use wpa_supplicant for dhcpcd-based systems
-    WPA_CONF="/etc/wpa_supplicant/wpa_supplicant.conf"
-    
-    # Backup if not already backed up
-    if [ ! -f "${WPA_CONF}.backup" ]; then
-        cp "$WPA_CONF" "${WPA_CONF}.backup"
-    fi
-    
-    # Add or update network configuration
-    wpa_passphrase "$SSID" "$PASSWORD" >> "$WPA_CONF"
-    
-    # Reconfigure wpa_supplicant
-    wpa_cli -i wlan0 reconfigure
-    
-else
-    echo "ERROR: No supported network manager found"
-    exit 1
-fi
+WIFI_CONFIG="/etc/NetworkManager/system-connections/pilookie-wifi.nmconnection"
+
+nmcli connection delete pilookie-wifi 2>/dev/null || true
+rm -f "$WIFI_CONFIG"
+
+UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "pilookie-$(date +%s)")
+
+cat > "$WIFI_CONFIG" <<EOF
+[connection]
+id=pilookie-wifi
+uuid=$UUID
+type=wifi
+autoconnect=true
+autoconnect-priority=999
+
+[wifi]
+ssid=$SSID
+mode=infrastructure
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=$PASSWORD
+
+[ipv4]
+method=auto
+
+[ipv6]
+method=auto
+EOF
+
+chmod 600 "$WIFI_CONFIG"
+chown root:root "$WIFI_CONFIG"
+
+nmcli connection reload
 
 echo "WiFi configuration updated successfully"
