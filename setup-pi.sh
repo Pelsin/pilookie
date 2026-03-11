@@ -29,9 +29,9 @@ fi
 sudo tee /etc/systemd/system/wifi-setup.service > /dev/null <<EOF
 [Unit]
 Description=PiLookie WiFi Setup from Boot Partition
-DefaultDependencies=no
-After=local-fs.target
-Before=network-pre.target
+After=NetworkManager.service
+Before=network-online.target
+Wants=network.target
 
 [Service]
 Type=oneshot
@@ -39,7 +39,7 @@ ExecStart=/usr/local/bin/setup-wifi.sh
 RemainAfterExit=yes
 
 [Install]
-WantedBy=sysinit.target
+WantedBy=multi-user.target
 EOF
 
 sudo systemctl enable wifi-setup.service

@@ -21,9 +21,11 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
-sudo nmcli connection delete pilookie-wifi 2>/dev/null || true
+# Delete existing connection if it exists
+nmcli connection delete pilookie-wifi 2>/dev/null || true
 
-sudo tee "$WIFI_CONFIG" > /dev/null <<EOF
+# Create new connection file
+tee "$WIFI_CONFIG" > /dev/null <<EOF
 [connection]
 id=pilookie-wifi
 uuid=$(uuidgen)
@@ -46,11 +48,13 @@ method=auto
 method=auto
 EOF
 
-sudo chmod 600 "$WIFI_CONFIG"
-sudo chown root:root "$WIFI_CONFIG"
+chmod 600 "$WIFI_CONFIG"
+chown root:root "$WIFI_CONFIG"
 
-sudo nmcli connection reload
-sudo nmcli connection up pilookie-wifi
+# Reload and activate the connection
+nmcli connection reload
+sleep 2
+nmcli connection up pilookie-wifi
 
 echo "WiFi configuration updated successfully"
 echo "Connected to SSID: $SSID"
