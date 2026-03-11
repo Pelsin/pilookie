@@ -34,18 +34,25 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
-# Check if NetworkManager is available
 if command -v nmcli &> /dev/null; then
     echo "Using NetworkManager..."
     
-    # Delete existing connection if it exists
     nmcli connection delete pilookie-wifi 2>/dev/null || true
     
-    # Connect using device wifi connect (simpler and more reliable)
-    nmcli device wifi connect "$SSID" password "$PASSWORD" name pilookie-wifi
+    nmcli connection add \
+        type wifi \
+        con-name pilookie-wifi \
+        ifname wlan0 \
+        ssid "$SSID" \
+        wifi-sec.key-mgmt wpa-psk \
+        wifi-sec.psk "$PASSWORD" \
+        wifi-sec.psk-flags 0 \
+        connection.autoconnect yes \
+        connection.autoconnect-priority 999
     
-    # Set autoconnect priority
-    nmcli connection modify pilookie-wifi connection.autoconnect-priority 999
+    sleep 1
+    
+    nmcli connection up pilookie-wifi 2>&1 || echo "Connection will activate automatically"
     
 elif [ -f /etc/dhcpcd.conf ]; then
     echo "Using dhcpcd/wpa_supplicant..."
