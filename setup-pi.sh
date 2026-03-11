@@ -53,12 +53,16 @@ if ! command -v cloudflared &> /dev/null; then
     cd "$PROJECT_DIR"
 fi
 
-# Find npm location
+# Find npm and node locations
 NPM_PATH=$(which npm)
-if [ -z "$NPM_PATH" ]; then
-    echo "Error: npm not found. Please install Node.js and npm first."
+NODE_PATH=$(which node)
+if [ -z "$NPM_PATH" ] || [ -z "$NODE_PATH" ]; then
+    echo "Error: npm or node not found. Please install Node.js and npm first."
     exit 1
 fi
+
+# Get the bin directory
+NODE_BIN_DIR=$(dirname "$NODE_PATH")
 
 echo "Creating systemd services..."
 sudo tee /etc/systemd/system/pilookie.service > /dev/null <<EOF
@@ -72,6 +76,7 @@ User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment=NODE_ENV=production
 Environment=PORT=3001
+Environment=PATH=$NODE_BIN_DIR:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=$NPM_PATH run start
 Restart=always
 RestartSec=10
