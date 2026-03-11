@@ -41,6 +41,9 @@ rm -f "$WIFI_CONFIG"
 
 UUID=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "pilookie-$(date +%s)")
 
+# Generate PSK hash using wpa_passphrase
+PSK_HASH=$(wpa_passphrase "$SSID" "$PASSWORD" | grep -E '^\s*psk=' | grep -v '#psk' | cut -d= -f2)
+
 cat > "$WIFI_CONFIG" <<EOF
 [connection]
 id=pilookie-wifi
@@ -55,7 +58,7 @@ mode=infrastructure
 
 [wifi-security]
 key-mgmt=wpa-psk
-psk=$PASSWORD
+psk=$PSK_HASH
 
 [ipv4]
 method=auto
