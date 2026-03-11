@@ -21,6 +21,8 @@ fi
 
 echo "Updating WiFi configuration for SSID: $SSID"
 
+sudo nmcli connection delete pilookie-wifi 2>/dev/null || true
+
 sudo tee "$WIFI_CONFIG" > /dev/null <<EOF
 [connection]
 id=pilookie-wifi
@@ -51,3 +53,4 @@ sudo nmcli connection reload
 sudo nmcli connection up pilookie-wifi
 
 echo "WiFi configuration updated successfully"
+echo "Connected to SSID: $SSID"
