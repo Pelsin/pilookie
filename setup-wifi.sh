@@ -41,19 +41,11 @@ if command -v nmcli &> /dev/null; then
     # Delete existing connection if it exists
     nmcli connection delete pilookie-wifi 2>/dev/null || true
     
-    # Create new connection using nmcli
-    nmcli connection add \
-        type wifi \
-        ifname wlan0 \
-        con-name pilookie-wifi \
-        ssid "$SSID" \
-        wifi-sec.key-mgmt wpa-psk \
-        wifi-sec.psk "$PASSWORD" \
-        connection.autoconnect yes \
-        connection.autoconnect-priority 999
+    # Connect using device wifi connect (simpler and more reliable)
+    nmcli device wifi connect "$SSID" password "$PASSWORD" name pilookie-wifi
     
-    sleep 2
-    nmcli connection up pilookie-wifi
+    # Set autoconnect priority
+    nmcli connection modify pilookie-wifi connection.autoconnect-priority 999
     
 elif [ -f /etc/dhcpcd.conf ]; then
     echo "Using dhcpcd/wpa_supplicant..."
