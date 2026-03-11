@@ -53,6 +53,13 @@ if ! command -v cloudflared &> /dev/null; then
     cd "$PROJECT_DIR"
 fi
 
+# Find npm location
+NPM_PATH=$(which npm)
+if [ -z "$NPM_PATH" ]; then
+    echo "Error: npm not found. Please install Node.js and npm first."
+    exit 1
+fi
+
 echo "Creating systemd services..."
 sudo tee /etc/systemd/system/pilookie.service > /dev/null <<EOF
 [Unit]
@@ -65,7 +72,7 @@ User=$USER
 WorkingDirectory=$PROJECT_DIR
 Environment=NODE_ENV=production
 Environment=PORT=3001
-ExecStart=/usr/bin/npm run start
+ExecStart=$NPM_PATH run start
 Restart=always
 RestartSec=10
 StandardOutput=journal
