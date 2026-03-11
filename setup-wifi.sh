@@ -51,6 +51,7 @@ uuid=$UUID
 type=wifi
 autoconnect=true
 autoconnect-priority=999
+permissions=
 
 [wifi]
 ssid=$SSID
@@ -59,17 +60,22 @@ mode=infrastructure
 [wifi-security]
 key-mgmt=wpa-psk
 psk=$PSK_HASH
+psk-flags=0
 
 [ipv4]
 method=auto
 
 [ipv6]
 method=auto
+
+[proxy]
 EOF
 
 chmod 600 "$WIFI_CONFIG"
 chown root:root "$WIFI_CONFIG"
 
 nmcli connection reload
+sleep 1
+nmcli connection up pilookie-wifi 2>&1 || true
 
 echo "WiFi configuration updated successfully"
