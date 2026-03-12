@@ -16,7 +16,7 @@ if(!USERNAME || !PASSWORD) {
 
 const app = new Hono();
 
-// startCamera();
+startCamera();
 
 process.on('SIGTERM', () => {
   stopCamera();
