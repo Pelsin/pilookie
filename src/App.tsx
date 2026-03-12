@@ -118,8 +118,13 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>PiLookie</h1>
-        <p className="subtitle">Live Camera Feed</p>
+        <div className="header-brand">
+          <h1>PiLookie</h1>
+        </div>
+        <div className="header-badge">
+          <span className="badge-dot" />
+          Live Feed
+        </div>
       </header>
 
       <main className="main-content">
@@ -127,28 +132,29 @@ function App() {
           <div className="photo-container">
             {imageUrl ? (
               <>
-                {timestamp && <div className="photo-timestamp">{timestamp}</div>}
                 <img src={imageUrl} alt="Latest photo" className="photo" />
+                {timestamp && <div className="photo-timestamp">{timestamp}</div>}
               </>
             ) : (
               <div className="photo-placeholder">
-                <p>No photo yet...</p>
+                <p>No photo yet</p>
               </div>
             )}
           </div>
 
           <div className="image-list-sidebar">
-            <div className="image-list-section">
-              <button
-                onClick={() => setAutoLoadLatest(!autoLoadLatest)}
-                className={`image-list-button ${autoLoadLatest ? 'active' : ''}`}
-              >
-                Automatically load latest
-              </button>
-            </div>
+            <button
+              onClick={() => setAutoLoadLatest(!autoLoadLatest)}
+              className={`sidebar-auto-btn ${autoLoadLatest ? "active" : ""}`}
+            >
+              {autoLoadLatest ? "⟳ Auto-loading latest" : "⟳ Auto-load latest"}
+            </button>
 
             <div className="image-list-section">
-              <h3>Snapshots ({snapshotList.length})</h3>
+              <div className="section-heading">
+                <h3>Snapshots</h3>
+                <span className="section-count">{snapshotList.length}</span>
+              </div>
               {snapshotList.length > 0 ? (
                 <ul className="image-list">
                   {snapshotList.map((filename) => (
@@ -159,7 +165,7 @@ function App() {
                           setImageUrl(`/api/images/${filename}`);
                           setTimestamp(fileNameToDateString(filename));
                         }}
-                        className={`image-list-button ${imageUrl.includes(filename) ? 'active' : ''}`}
+                        className={`image-list-button ${imageUrl.includes(filename) ? "active" : ""}`}
                       >
                         {fileNameToDateString(filename)}
                       </button>
@@ -171,8 +177,13 @@ function App() {
               )}
             </div>
 
+            <div className="sidebar-divider" />
+
             <div className="image-list-section">
-              <h3>Timelapse ({timelapseList.length})</h3>
+              <div className="section-heading">
+                <h3>Timelapse</h3>
+                <span className="section-count">{timelapseList.length}</span>
+              </div>
               {timelapseList.length > 0 ? (
                 <ul className="image-list">
                   {timelapseList.map((filename) => (
@@ -183,7 +194,7 @@ function App() {
                           setImageUrl(`/api/images/${filename}`);
                           setTimestamp(fileNameToDateString(filename));
                         }}
-                        className={`image-list-button ${imageUrl.includes(filename) ? 'active' : ''}`}
+                        className={`image-list-button ${imageUrl.includes(filename) ? "active" : ""}`}
                       >
                         {fileNameToDateString(filename)}
                       </button>
@@ -199,8 +210,8 @@ function App() {
 
         <div className="controls">
           <div className="settings">
-            <label>
-              Image capture Interval (seconds):
+            <div className="settings-group">
+              <span className="settings-label">Capture interval</span>
               <input
                 type="number"
                 min="3"
@@ -214,10 +225,15 @@ function App() {
                 }
                 className="interval-input"
               />
-            </label>
-            <label>
+              <span className="settings-label">sec</span>
+            </div>
+
+            <div className="settings-divider" />
+
+            <div className="settings-group">
               <input
                 type="checkbox"
+                id="timelapse-toggle"
                 checked={config.timelapseEnabled}
                 onChange={(e) =>
                   setConfig((prev) => ({
@@ -226,10 +242,15 @@ function App() {
                   }))
                 }
               />
-              Enable Timelapse
-            </label>
+              <label htmlFor="timelapse-toggle" className="settings-label" style={{ cursor: "pointer" }}>
+                Timelapse enabled
+              </label>
+            </div>
+
+            <div className="settings-divider" />
+
             <button onClick={saveConfig} className="save-btn">
-              Save Settings
+              Save
             </button>
           </div>
 
@@ -238,7 +259,7 @@ function App() {
             disabled={isCapturing}
             className="capture-btn"
           >
-            {isCapturing ? "⏳ Capturing..." : "📷 Capture Photo"}
+            {isCapturing ? "Capturing…" : "Capture Photo"}
           </button>
         </div>
       </main>
