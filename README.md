@@ -6,7 +6,18 @@ A web-based camera control system for managing time-lapse photography with remot
 
 1. Copy the project to your Raspberry Pi
 
-2. Install dependencies:
+2. Install nvm and Node.js:
+   ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+   nvm install --lts
+   ```
+
+3. Install gphoto2:
+   ```bash
+   sudo apt-get install gphoto2
+   ```
+
+4. Install dependencies:
    ```bash
    npm install
    ```
